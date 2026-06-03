@@ -49,7 +49,7 @@ export default function RegisterPage() {
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm">
         {/* Logo y título */}
         <div className="text-center mb-8">
-          <img src="/logo2.png" alt="ROST" className="h-12 mx-auto mb-4" />
+          <img src="/logo.png" alt="ROST" className="h-12 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-[#354867]">Crear cuenta</h2>
         </div>
 
@@ -104,7 +104,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={registerMutation.isPending}
-            className="w-full bg-[#c8a97e] text-white py-2.5 rounded-lg font-medium hover:bg-[#b8966a] transition-colors disabled:bg-gray-300"
+            className="w-full bg-primary-container text-white py-2.5 rounded-lg font-medium hover:opacity-90 transition-colors disabled:bg-gray-300"
           >
             {registerMutation.isPending ? "Registrando..." : "Registrarse"}
           </button>
@@ -121,7 +121,7 @@ export default function RegisterPage() {
           ¿Ya tenés cuenta?{" "}
           <button
             onClick={() => navigate("/login")}
-            className="text-[#c8a97e] underline"
+            className="text-primary font-semibold hover:underline"
           >
             Iniciá sesión
           </button>
