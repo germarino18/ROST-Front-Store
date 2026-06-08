@@ -96,6 +96,16 @@ export default function Navbar() {
           >
             Mis Pedidos
           </Link>
+          {/* Admin: solo visible si el usuario tiene rol ADMIN, STOCK o PEDIDOS */}
+          {usuario && ['ADMIN', 'STOCK', 'PEDIDOS'].includes(usuario.rol?.codigo ?? '') && (
+            <a
+              href="http://localhost:5173/"
+              className="font-body text-body-md text-tertiary hover:text-tertiary-container transition-colors font-semibold flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-lg">admin_panel_settings</span>
+              Admin
+            </a>
+          )}
           {/* Carrito con badge de cantidad */}
           <Link to="/carrito" className="relative p-1">
             <span className="material-symbols-outlined text-on-surface text-2xl hover:text-primary transition-colors">
@@ -193,7 +203,7 @@ export default function Navbar() {
               Mis Pedidos
             </Link>
             {/* Admin link en menú mobile */}
-            {usuario && usuario.roles?.some(r => ['ADMIN', 'STOCK', 'PEDIDOS'].includes(r.rol_codigo)) && (
+            {usuario && ['ADMIN', 'STOCK', 'PEDIDOS'].includes(usuario.rol?.codigo ?? '') && (
               <a
                 href="http://localhost:5174/admin"
                 onClick={closeMenu}
