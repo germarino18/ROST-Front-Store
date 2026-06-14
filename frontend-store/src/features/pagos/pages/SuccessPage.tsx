@@ -3,14 +3,28 @@
  *
  * MP redirige aquí después del pago vía back_urls.success con query params:
  *   /pago-exitoso?payment_id=123&status=approved&external_reference=xyz
- *  consultamos a MercadoPago DIRECTAMENTE vía POST /api/v1/pagos/verificar/{payment_id} para obtener el estado REAL.
+ *
+ * consultamos a MercadoPago DIRECTAMENTE vía POST /api/v1/pagos/verificar/{payment_id} para obtener el estado REAL.
  */
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { verificarPago } from "../../../api/pagos";
+import { useCartStore } from "../../carrito/store/cartStore";
 
 type PagoEstado = "loading" | "approved" | "rejected" | "pending" | "error";
+
+/** Mapeo de métodos de pago de MercadoPago a nombres amigables */
+const paymentMethodLabels: Record<string, string> = {
+  account_money: 'Mercado Pago',
+  visa: 'Visa',
+  master: 'Mastercard',
+  amex: 'American Express',
+  debvisa: 'Visa Débito',
+  debmaster: 'Mastercard Débito',
+  rapipago: 'Rapipago',
+  pagofacil: 'Pago Fácil',
+};
 
 interface VerificarResponse {
   status: string;
@@ -23,6 +37,7 @@ interface VerificarResponse {
 export default function SuccessPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { clearCart } = useCartStore();
   /** ID del pago que MP envía en la URL de redirect */
   const paymentId = searchParams.get("payment_id");
 
@@ -42,6 +57,10 @@ export default function SuccessPage() {
     verificarPago(Number(paymentId))
       .then((res: VerificarResponse) => {
         if (res.status === "ok" && res.pago_status) {
+          if (res.pago_status === "approved") {
+            // Pago aprobado → vaciamos el carrito porque el pedido ya se creó
+            clearCart();
+          }
           setEstado(res.pago_status as PagoEstado);
           setMonto(res.transaction_amount || 0);
           setMetodoPago(res.payment_method_id || "");
@@ -113,8 +132,8 @@ export default function SuccessPage() {
             {metodoPago && (
               <div className="flex justify-between">
                 <span className="font-body text-body-md text-on-surface-variant">Método de pago</span>
-                <span className="font-body text-body-md text-on-surface font-semibold capitalize">
-                  {metodoPago.replace("_", " ")}
+                <span className="font-body text-body-md text-on-surface font-semibold">
+                  {paymentMethodLabels[metodoPago] ?? metodoPago.replace("_", " ")}
                 </span>
               </div>
             )}

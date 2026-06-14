@@ -155,7 +155,7 @@ export default function CartPage() {
 
   // --- Cálculos del resumen
   const subtotal = total();
-  const envioDisplay = subtotal > 50 ? 0 : 5.99;   // Envío gratis > $50
+  const envioDisplay = subtotal > 8000 ? 0 : 1000;   // Envío gratis > $8.000
   const impuestoDisplay = subtotal * 0.21;           // IVA 21%
   const totalConEnvio = subtotal + envioDisplay + impuestoDisplay;
 
