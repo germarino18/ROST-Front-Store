@@ -274,7 +274,7 @@ export default function OrdersPage() {
                   <div className="mt-2 space-y-1">
                     {pedido.historial.map((h) => (
                       <div key={h.id} className="flex gap-2">
-                        <span className="font-medium">{h.estado}</span>
+                        <span className="font-medium">{h.estado_hacia}</span>
                         <span>·</span>
                         <span>
                           {new Date(h.fecha).toLocaleString("es-AR")}

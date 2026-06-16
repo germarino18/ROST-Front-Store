@@ -31,9 +31,11 @@ interface Props {
  */
 export default function CartItem({ item, onUpdateCantidad, onRemove }: Props) {
   const subtotal = item.producto.precio_base * item.cantidad;
+  const stock = item.producto.stock_cantidad;
+  const sinStock = stock !== null && item.cantidad >= stock;
 
   return (
-    <div className="flex items-center gap-6 p-6 bg-surface-container-high rounded-lg border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
+    <div className="flex items-center gap-6 p-6 bg-surface-container-high rounded-lg border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow relative">
       {/* Imagen del producto */}
       <div className="w-24 h-24 rounded-lg overflow-hidden bg-primary/5 flex-shrink-0 flex items-center justify-center">
         {item.producto.imagenes_url?.[0] ? (
@@ -56,6 +58,11 @@ export default function CartItem({ item, onUpdateCantidad, onRemove }: Props) {
         <p className="font-body text-body-sm text-on-surface-variant mt-0.5">
           ${item.producto.precio_base.toFixed(2)} c/u
         </p>
+        {stock !== null && (
+          <p className={`font-body text-xs mt-0.5 ${sinStock ? 'text-error' : 'text-on-surface-variant/60'}`}>
+            {sinStock ? 'Stock máximo alcanzado' : `Stock: ${stock}`}
+          </p>
+        )}
       </div>
       {/* Controles de cantidad: - [cantidad] + */}
       <div className="flex items-center gap-1">
@@ -71,7 +78,8 @@ export default function CartItem({ item, onUpdateCantidad, onRemove }: Props) {
         </span>
         <button
           onClick={() => onUpdateCantidad(item.producto.id, item.cantidad + 1)}
-          className="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors"
+          disabled={sinStock}
+          className="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <span className="material-symbols-outlined text-sm">add</span>
         </button>

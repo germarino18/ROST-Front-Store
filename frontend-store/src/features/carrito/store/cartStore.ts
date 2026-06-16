@@ -48,28 +48,37 @@ export const useCartStore = create<CartStore>()(
       items: [],  // Estado inicial: carrito vacío
 
       /**
-       * addItem — Agrega un producto al carrito.
-       * - Si el producto ya existe, incrementa su cantidad en 1.
-       * - Si no existe, lo agrega con cantidad 1.
+       * addItem — Agrega un producto al carrito respetando el stock disponible.
+       * - Si el producto ya existe, incrementa su cantidad en 1 (sin superar stock).
+       * - Si no existe, lo agrega con cantidad 1 (solo si hay stock).
+       * - Si stock_cantidad es null se interpreta como stock ilimitado.
        *
        * @param producto - Producto a agregar (objeto completo)
        */
       addItem: (producto) =>
         set((state) => {
+          const stock = producto.stock_cantidad;
           const existe = state.items.find(
             (i) => i.producto.id === producto.id
           );
           if (existe) {
-            // Ya está en el carrito → incrementa cantidad
+            // Ya está en el carrito → incrementa cantidad si hay stock
+            const nuevaCant = existe.cantidad + 1;
+            if (stock !== null && nuevaCant > stock) {
+              return state; // No supera el stock disponible
+            }
             return {
               items: state.items.map((i) =>
                 i.producto.id === producto.id
-                  ? { ...i, cantidad: i.cantidad + 1 }
+                  ? { ...i, cantidad: nuevaCant }
                   : i
               ),
             };
           }
-          // No está en el carrito → agrega con cantidad 1
+          // No está en el carrito → agrega solo si hay stock
+          if (stock !== null && stock < 1) {
+            return state; // Sin stock
+          }
           return { items: [...state.items, { producto, cantidad: 1 }] };
         }),
 
@@ -85,16 +94,21 @@ export const useCartStore = create<CartStore>()(
 
       /**
        * updateCantidad — Actualiza la cantidad de un producto específico.
-       * Permite tanto incrementar como decrementar.
+       * No permite superar el stock disponible (si stock_cantidad no es null).
+       * Tampoco permite bajar de 1 (mínimo).
        *
        * @param id - ID del producto
        * @param cantidad - Nueva cantidad (debe ser >= 1)
        */
       updateCantidad: (id, cantidad) =>
         set((state) => ({
-          items: state.items.map((i) =>
-            i.producto.id === id ? { ...i, cantidad } : i
-          ),
+          items: state.items.map((i) => {
+            if (i.producto.id !== id) return i;
+            const stock = i.producto.stock_cantidad;
+            const nuevaCant = Math.max(1, cantidad);
+            const capped = stock !== null ? Math.min(nuevaCant, stock) : nuevaCant;
+            return { ...i, cantidad: capped };
+          }),
         })),
 
       /**

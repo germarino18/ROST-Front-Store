@@ -31,6 +31,10 @@ export default function DireccionesPage() {
   const [direccion, setDireccion] = useState("");
   const [ciudad, setCiudad] = useState("");
   const [region, setRegion] = useState("");
+  const [codigoPostal, setCodigoPostal] = useState("");
+  const [departamento, setDepartamento] = useState(false);
+  const [piso, setPiso] = useState("");
+  const [puerta, setPuerta] = useState("");
 
   /**
    * Query: GET /direcciones
@@ -57,6 +61,10 @@ export default function DireccionesPage() {
       setDireccion("");
       setCiudad("");
       setRegion("");
+      setCodigoPostal("");
+      setDepartamento(false);
+      setPiso("");
+      setPuerta("");
     },
   });
 
@@ -79,7 +87,13 @@ export default function DireccionesPage() {
    */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    crearMutation.mutate({ alias, direccion, ciudad, region });
+    crearMutation.mutate({
+      alias, direccion, ciudad, region,
+      codigo_postal: codigoPostal,
+      departamento,
+      piso: departamento ? (piso || null) : null,
+      puerta: departamento ? (puerta || null) : null,
+    });
   };
 
   return (
@@ -116,17 +130,32 @@ export default function DireccionesPage() {
               className="w-full bg-[#F5E6D3] border border-outline-variant rounded-lg px-4 py-2.5 text-on-surface font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-on-surface-variant/50"
             />
           </div>
-          <div>
-            <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1.5">Dirección</label>
-            <input
-              type="text"
-              value={direccion}
-              onChange={(e) => setDireccion(e.target.value)}
-              placeholder="Calle y número"
-              required
-              className="w-full bg-[#F5E6D3] border border-outline-variant rounded-lg px-4 py-2.5 text-on-surface font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-on-surface-variant/50"
-            />
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1.5">Dirección</label>
+              <input
+                type="text"
+                value={direccion}
+                onChange={(e) => setDireccion(e.target.value)}
+                placeholder="Calle y número"
+                required
+                className="w-full bg-[#F5E6D3] border border-outline-variant rounded-lg px-4 py-2.5 text-on-surface font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-on-surface-variant/50"
+              />
+            </div>
+            <div>
+              <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1.5">Código Postal</label>
+              <input
+                type="text"
+                value={codigoPostal}
+                onChange={(e) => setCodigoPostal(e.target.value)}
+                placeholder="1234"
+                required
+                className="w-full bg-[#F5E6D3] border border-outline-variant rounded-lg px-4 py-2.5 text-on-surface font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-on-surface-variant/50"
+              />
+            </div>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1.5">Ciudad</label>
@@ -139,7 +168,7 @@ export default function DireccionesPage() {
               />
             </div>
             <div>
-              <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1.5">Región</label>
+              <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1.5">Región / Provincia</label>
               <input
                 type="text"
                 value={region}
@@ -149,6 +178,47 @@ export default function DireccionesPage() {
               />
             </div>
           </div>
+
+          {/* Departamento toggle */}
+          <div className="flex items-center gap-3">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={departamento}
+                onChange={(e) => setDepartamento(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-container/40 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+            <span className="font-body text-sm text-on-surface">Es un departamento / ph</span>
+          </div>
+
+          {/* Campos condicionales: piso y puerta (solo si es departamento) */}
+          {departamento && (
+            <div className="grid grid-cols-2 gap-4 pl-1">
+              <div>
+                <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1.5">Piso</label>
+                <input
+                  type="text"
+                  value={piso}
+                  onChange={(e) => setPiso(e.target.value)}
+                  placeholder="Ej: 3"
+                  className="w-full bg-[#F5E6D3] border border-outline-variant rounded-lg px-4 py-2.5 text-on-surface font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-on-surface-variant/50"
+                />
+              </div>
+              <div>
+                <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1.5">Puerta / Departamento</label>
+                <input
+                  type="text"
+                  value={puerta}
+                  onChange={(e) => setPuerta(e.target.value)}
+                  placeholder="Ej: B"
+                  className="w-full bg-[#F5E6D3] border border-outline-variant rounded-lg px-4 py-2.5 text-on-surface font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-on-surface-variant/50"
+                />
+              </div>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={crearMutation.isPending}
@@ -174,7 +244,13 @@ export default function DireccionesPage() {
                 </div>
                 <div>
                   <p className="font-body font-semibold text-on-surface">{d.alias}</p>
-                  <p className="font-body text-sm text-on-surface-variant">{d.direccion}, {d.ciudad}</p>
+                  <p className="font-body text-sm text-on-surface-variant">
+                    {d.direccion}, {d.ciudad} ({d.codigo_postal})
+                  </p>
+                  <p className="font-body text-sm text-on-surface-variant">{d.region}</p>
+                  {d.departamento && d.piso && (
+                    <p className="font-body text-xs text-on-surface-variant/70">Piso {d.piso}{d.puerta ? `, Puerta ${d.puerta}` : ''}</p>
+                  )}
                 </div>
               </div>
               <button

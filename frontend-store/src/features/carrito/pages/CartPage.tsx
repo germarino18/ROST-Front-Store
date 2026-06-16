@@ -69,7 +69,7 @@ export default function CartPage() {
    */
   const crearPedidoMutation = useMutation({
     mutationFn: (data: {
-      direccion_id: number;
+      direccion_entrega_id: number;
       forma_pago_id: number;
       items: { producto_id: number; cantidad: number }[];
     }) => api.post("/pedidos", data).then((r) => r.data),
@@ -121,7 +121,7 @@ export default function CartPage() {
   const handleConfirmar = () => {
     if (!direccionId || !formaPagoId) return;
     crearPedidoMutation.mutate({
-      direccion_id: Number(direccionId),
+      direccion_entrega_id: Number(direccionId),
       forma_pago_id: Number(formaPagoId),
       items: items.map((i) => ({
         producto_id: i.producto.id,
@@ -323,7 +323,7 @@ export default function CartPage() {
       {/* Estado ERROR en la mutation */}
       {crearPedidoMutation.isError && (
         <p className="font-body text-body-md text-error text-center mt-6">
-          Error al crear el pedido. ¿Estás autenticado?
+          {(crearPedidoMutation.error as any)?.response?.data?.detail || 'Error al crear el pedido. ¿Estás autenticado?'}
         </p>
       )}
       {crearPreferenceMutation.isError && (

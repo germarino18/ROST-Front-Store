@@ -90,7 +90,7 @@ export interface Producto {
  * PedidoCreate — Payload para crear un nuevo pedido (POST /pedidos).
  */
 export interface PedidoCreate {
-  direccion_id: number;
+  direccion_entrega_id: number;
   forma_pago_id: number;
   items: { producto_id: number; cantidad: number }[];
 }
@@ -125,11 +125,14 @@ export interface PedidoRead {
 
 /**
  * HistorialEstadoRead — Cambio de estado en el historial del pedido.
+ * estado_desde: estado anterior (null si es el primer estado).
+ * estado_hacia: nuevo estado.
  * fecha: timestamp del cambio.
  */
 export interface HistorialEstadoRead {
   id: number;
-  estado: string;
+  estado_desde?: string | null;
+  estado_hacia: string;
   fecha: string;
 }
 
@@ -141,6 +144,11 @@ export interface DireccionRead {
   alias: string;
   direccion: string;
   ciudad: string;
+  region: string;
+  codigo_postal: string;
+  departamento: boolean;
+  piso?: string | null;
+  puerta?: string | null;
 }
 
 /**
@@ -151,7 +159,10 @@ export interface DireccionCreate {
   direccion: string;
   ciudad: string;
   region: string;
-  codigo_postal?: string;
+  codigo_postal: string;
+  departamento?: boolean;
+  piso?: string | null;
+  puerta?: string | null;
 }
 
 /**

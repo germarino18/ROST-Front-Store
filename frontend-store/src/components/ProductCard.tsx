@@ -29,7 +29,9 @@ interface Props {
  * @returns {JSX.Element} Card con imagen, info y botón de acción
  */
 export default function ProductCard({ producto, onAddToCart }: Props) {
-  const sinStock = producto.stock_cantidad === 0;
+  const stock = producto.stock_cantidad;
+  const sinStock = stock !== null && stock <= 0;
+  const stockBajo = stock !== null && stock > 0 && stock <= 5;
   const noDisponible = !producto.disponible;
 
   return (
@@ -97,17 +99,23 @@ export default function ProductCard({ producto, onAddToCart }: Props) {
           {/* Botón agregar al carrito */}
           <button
             onClick={() => onAddToCart(producto)}
-            disabled={noDisponible}
+            disabled={noDisponible || sinStock}
             className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-container transition-colors disabled:bg-outline-variant disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+            title={sinStock ? 'Sin stock' : 'Agregar al carrito'}
           >
             <span className="material-symbols-outlined text-lg">add</span>
           </button>
         </div>
-        {/* Badges de estado: sin stock / no disponible */}
+        {/* Badges de estado: sin stock / stock bajo / no disponible */}
         <div className="flex gap-2 mt-2">
           {sinStock && (
             <span className="font-body text-label-sm bg-error-container text-error px-2.5 py-0.5 rounded-full">
               Sin stock
+            </span>
+          )}
+          {stockBajo && (
+            <span className="font-body text-label-sm bg-primary/10 text-primary px-2.5 py-0.5 rounded-full">
+              Stock: {stock}
             </span>
           )}
           {noDisponible && !sinStock && (
