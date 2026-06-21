@@ -1,73 +1,49 @@
-# React + TypeScript + Vite
+# ROST Frontend Store (Tienda para Clientes)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este es el frontend de la tienda (e-commerce) del proyecto ROST, construido con **React + TypeScript + Vite** y estilado con **Tailwind CSS**. Permite a los clientes ver productos por categorías, armar un carrito de compras y realizar pagos integrados con Mercado Pago.
 
-Currently, two official plugins are available:
+## 🚀 Cómo empezar
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Seguí estos pasos para correr la tienda de manera local.
 
-## React Compiler
+> [!IMPORTANT]  
+> Usar siempre **pnpm** como gestor de paquetes para este proyecto.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Requisitos previos
+Asegurate de tener instalado:
+- **Node.js** (versión 18 o superior recomendada)
+- **pnpm** (instalalo globalmente con `npm install -g pnpm` si todavía no lo tenés)
 
-## Expanding the ESLint configuration
+### 2. Configurar variables de entorno
+Crea un archivo `.env` en la raíz de la carpeta `frontend-store` con tu clave pública de Mercado Pago:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```env
+VITE_MP_PUBLIC_KEY=tu_public_key_de_mercado_pago
+```
+*(Podés usar una clave de prueba de una cuenta de desarrollador en Mercado Pago).*
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 3. Instalar dependencias
+Desde la carpeta `frontend-store`, ejecutá:
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 4. Ejecutar el servidor de desarrollo
+Para levantar el entorno local:
+```bash
+pnpm dev
 ```
+
+El servidor levantará en [http://localhost:5173](http://localhost:5173) (o en otro puerto disponible).
+
+---
+
+## 💳 Integración con Mercado Pago
+La tienda utiliza la SDK oficial de Mercado Pago para procesar los pagos. La clave pública configurada en el `.env` (`VITE_MP_PUBLIC_KEY`) se asocia con el Checkout Pro para desplegar el ladrillo de pago al finalizar el pedido.
+
+---
+
+## 🔌 Conexión con la API Backend
+Este proyecto cuenta con un proxy en `vite.config.ts` que redirige de manera automática las peticiones con prefijo `/api` a `http://localhost:8000` (el puerto por defecto del backend).
+
+*Asegurate de tener el backend corriendo en el puerto 8000 para que las peticiones y los flujos de compra se completen con éxito.*
