@@ -82,6 +82,25 @@ export default function ProfilePage() {
   const [piso, setPiso] = useState('');
   const [puerta, setPuerta] = useState('');
 
+  // --- Estado de edición: null = creación, número = editando esa dirección
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  /**
+   * resetForm — Resetea todos los campos del formulario y sale del modo edición.
+   */
+  const resetForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setAlias('');
+    setDireccion('');
+    setCiudad('');
+    setRegion('');
+    setCodigoPostal('');
+    setDepartamento(false);
+    setPiso('');
+    setPuerta('');
+  };
+
   /**
    * Query: GET /direcciones
    * Obtiene las direcciones del usuario autenticado.
@@ -102,15 +121,21 @@ export default function ProfilePage() {
       api.post('/direcciones', data).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['direcciones'] });
-      setShowForm(false);
-      setAlias('');
-      setDireccion('');
-      setCiudad('');
-      setRegion('');
-      setCodigoPostal('');
-      setDepartamento(false);
-      setPiso('');
-      setPuerta('');
+      resetForm();
+    },
+  });
+
+  /**
+   * Mutation: PUT /direcciones/:id
+   * Actualiza una dirección existente.
+   * On success: refresca la lista, cierra formulario y resetea.
+   */
+  const actualizarMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: DireccionCreate }) =>
+      api.put(`/direcciones/${id}`, data).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['direcciones'] });
+      resetForm();
     },
   });
 
@@ -135,19 +160,45 @@ export default function ProfilePage() {
   };
 
   /**
-   * handleSubmit — Envía el formulario de nueva dirección.
+   * handleEdit — Precarga el formulario con los datos de una dirección existente
+   *             y cambia al modo edición.
+   *
+   * @param d - Dirección a editar
+   */
+  const handleEdit = (d: DireccionRead) => {
+    setEditingId(d.id);
+    setAlias(d.alias);
+    setDireccion(d.direccion);
+    setCiudad(d.ciudad);
+    setRegion(d.region);
+    setCodigoPostal(d.codigo_postal);
+    setDepartamento(d.departamento);
+    setPiso(d.piso ?? '');
+    setPuerta(d.puerta ?? '');
+    setShowForm(true);
+  };
+
+  /**
+   * handleSubmit — Envía el formulario.
+   * Si editingId está seteado, hace PUT (actualizar).
+   * Si no, hace POST (crear).
    *
    * @param e - Evento del formulario
    */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    crearMutation.mutate({
+    const payload: DireccionCreate = {
       alias, direccion, ciudad, region,
       codigo_postal: codigoPostal,
       departamento,
       piso: departamento ? (piso || null) : null,
       puerta: departamento ? (puerta || null) : null,
-    });
+    };
+    if (editingId) {
+      actualizarMutation.mutate({ id: editingId, data: payload });
+    } else {
+      crearMutation.mutate(payload);
+    }
   };
 
   // --- Estado LOADING: verificando autenticación
@@ -353,7 +404,10 @@ export default function ProfilePage() {
                 Mis Direcciones
               </h3>
               <button
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => {
+                  if (editingId) resetForm();
+                  else setShowForm(!showForm);
+                }}
                 className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all"
               >
                 <span className="material-symbols-outlined text-[16px]">{showForm ? 'close' : 'add'}</span>
@@ -364,6 +418,12 @@ export default function ProfilePage() {
             {/* Formulario de nueva dirección (toggle) */}
             {showForm && (
               <form onSubmit={handleSubmit} className="bg-surface-container-high rounded-lg p-6 mb-6 space-y-4 border border-outline-variant/10">
+                {editingId && (
+                  <div className="flex items-center gap-2 text-primary mb-2">
+                    <span className="material-symbols-outlined text-[18px]">edit</span>
+                    <span className="font-label-md text-label-md">Editando dirección</span>
+                  </div>
+                )}
                 <div>
                   <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1.5">Alias</label>
                   <input
@@ -465,10 +525,15 @@ export default function ProfilePage() {
 
                 <button
                   type="submit"
-                  disabled={crearMutation.isPending}
+                  disabled={crearMutation.isPending || actualizarMutation.isPending}
                   className="w-full bg-primary-container text-on-primary py-3 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all disabled:opacity-50"
                 >
-                  {crearMutation.isPending ? 'Guardando...' : 'Guardar Dirección'}
+                  {crearMutation.isPending || actualizarMutation.isPending
+                    ? 'Guardando...'
+                    : editingId
+                      ? 'Actualizar Dirección'
+                      : 'Guardar Dirección'
+                  }
                 </button>
               </form>
             )}
@@ -497,13 +562,22 @@ export default function ProfilePage() {
                         )}
                       </div>
                     </div>
-                    <button
-                      onClick={() => eliminarMutation.mutate(d.id)}
-                      className="text-on-surface-variant/50 hover:text-error transition-colors p-2 opacity-0 group-hover:opacity-100"
-                      title="Eliminar"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">delete</span>
-                    </button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleEdit(d)}
+                        className="text-on-surface-variant/50 hover:text-primary transition-colors p-2"
+                        title="Editar"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                      </button>
+                      <button
+                        onClick={() => eliminarMutation.mutate(d.id)}
+                        className="text-on-surface-variant/50 hover:text-error transition-colors p-2"
+                        title="Eliminar"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
                   </div>
                 ))
               ) : (

@@ -166,6 +166,12 @@ export interface DireccionCreate {
 }
 
 /**
+ * DireccionUpdate — Payload para actualizar una dirección (PUT /direcciones/:id).
+ * Todos los campos son opcionales (el backend aplica exclude_unset).
+ */
+export type DireccionUpdate = Partial<DireccionCreate>;
+
+/**
  * FormaPago — Método de pago disponible.
  * Ej: "Efectivo", "Mercado Pago", "Transferencia"
  */
