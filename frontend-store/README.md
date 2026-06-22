@@ -1,8 +1,10 @@
 # ROST Frontend Store (Tienda para Clientes)
 
+LINK DEL VIDEO: https://www.youtube.com/watch?v=MrAY16nCnAo
+
 Este es el frontend de la tienda (e-commerce) del proyecto ROST, construido con **React + TypeScript + Vite** y estilado con **Tailwind CSS**. Permite a los clientes ver productos por categorías, armar un carrito de compras y realizar pagos integrados con Mercado Pago.
 
-## 🚀 Cómo empezar
+## Cómo empezar
 
 Seguí estos pasos para correr la tienda de manera local.
 
@@ -38,12 +40,12 @@ El servidor levantará en [http://localhost:5173](http://localhost:5173) (o en o
 
 ---
 
-## 💳 Integración con Mercado Pago
+## Integración con Mercado Pago
 La tienda utiliza la SDK oficial de Mercado Pago para procesar los pagos. La clave pública configurada en el `.env` (`VITE_MP_PUBLIC_KEY`) se asocia con el Checkout Pro para desplegar el ladrillo de pago al finalizar el pedido.
 
 ---
 
-## 🔌 Conexión con la API Backend
+## Conexión con la API Backend
 Este proyecto cuenta con un proxy en `vite.config.ts` que redirige de manera automática las peticiones con prefijo `/api` a `http://localhost:8000` (el puerto por defecto del backend).
 
 *Asegurate de tener el backend corriendo en el puerto 8000 para que las peticiones y los flujos de compra se completen con éxito.*
